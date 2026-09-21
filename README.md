@@ -93,13 +93,18 @@ npx playwright show-trace test-results/<describe-name>-<test-name>-chromium/trac
 
 **Вибір репортерів (3–4 речення):**
 
-> _Вписати тут..._
+> I have the following reportings: HTML, JUNIT and LIST. They all are built in reporters.
+LIST reporter prints each test name along with its status as the run progresses, making it ideal for local
+development where readability matters.
+HTML reporter - It simple and useful reporter to use. It gives both screenshot and trace to the issue occured. Easy to inspect the failed test.
+The JUnit reporter outputs test results in XML format that is widely supported by CI systems,
+making it ideal for CI dashboards that track test summaries and trends over time
 
 **Аналіз впалого тесту:**
 
-- **Що** впало:
-- **Як** впало:
-- **Чому** (root cause):
+- **Що** впало: 3. should display correct logo
+- **Як** впало: Error: expect(locator).toBeVisible() failed
+- **Чому** (root cause): Invalid locator
 
 ---
 
@@ -130,27 +135,18 @@ Limit the answer to the three parts above and nothing else.
 
 ### Що здати
 
-- [ ] Відповідь агента (скриншот або текст).
-- [ ] **Порівняння з власним аналізом** (3–5 речень): у чому збіглися висновки, у чому розійшлися, чи знайшов агент щось, що ви пропустили (або навпаки).
-- [ ] **Оцінка, чи дотримався агент обмежень**: чи дав він тільки аналіз, чи все ж зісковзнув у пропозиції/виправлення попри заборону в промпті.
+- [ ]**Відповідь агента:** (скриншот або текст):
+WHAT failed — Seven assertions in tests/home-page.spec.ts failed after the page loaded. getByAltText(/greencity-logo/i).first() was not found. getByRole('link', { name: 'sing in button' }) was not found. getByPlaceholder(/search/i) was not found. getByRole('heading', { name: /A new way to grow habits/i }) was not found. getByRole('textbox', { name: /email/i }) had value test123@example.com while the assertion expected test@example.com. footer ul links did not match the expected five texts. footer getByRole('link', { name: /leenkedin/i }) was not found.
+
+HOW it failed — Each test opened https://www.greencity.cx.ua/#/greenCity in beforeEach. The accessibility snapshot shows the guest home page rendered: header, main, and footer are present. The logo is a link named "Image green city logo". The sign-in control is an image named "sing in button", next to a "Sign up" link. Header search is a search landmark named "site search", with the text "Welcome to the search window" and no input whose placeholder matches /search/i. The h1 reads "A new way to cultivate useful habits". The newsletter textbox is named "Enter your email"; the test filled test123@example.com and the field kept that value. The footer list has six links: " Eco news ", " Events ", " Places ", " About Us ", " My Space ", " UBS Courier ". Social links are named "Twitter link", "LinkedIn link", "Facebook link", "Instagram link", and "YouTube link". The Twitter check passed; the run stopped on /leenkedin/i.
+
+WHY it failed — The page is up. Each failure is a mismatch between the assertion and that snapshot. The logo alt text on the page is "Image green city logo", which does not match /greencity-logo/i. The sign-in name "sing in button" is on an image, so a link role does not match it. The search landmark exists, but no placeholder containing "search" is in the tree. The heading says "cultivate useful habits", so /A new way to grow habits/i does not match. The email assertion expects test@example.com after the test typed test123@example.com, and the input kept the typed value. The footer list includes "Places" and surrounding spaces, so it is not the five exact strings the test lists. /leenkedin/i does not match the accessible name "LinkedIn link".
+
+- [ ] **Порівняння з власним аналізом** : Agent provided more precise analysis then I. I analysed only 1 test, while agent processed all of them. Also agent gave more details in WHY section, which could potentially help in future fixes.
+- [ ] **Оцінка, чи дотримався агент обмежень**: Yes, the limits were preserved.
 
 > Уміння помітити, що агент порушив рамки промпту, — це частина навички роботи з AI-інструментами.
 
-### Мої відповіді — Завдання 2
-
-**Відповідь агента:**
-
-> _Вставити текст або посилання на скриншот..._
-
-**Порівняння з власним аналізом (3–5 речень):**
-
-> _Вписати тут..._
-
-**Оцінка дотримання обмежень:**
-
-> _Вписати тут..._
-
----
 
 ## Завдання 3 — Виправити помилки *(обов'язково)*
 
@@ -166,11 +162,23 @@ Limit the answer to the three parts above and nothing else.
 
 **Що було не так і як виправлено:**
 
-> _Вписати diff або опис по кожному тесту..._
+> 3. should display correct logo. The alt text /greencity-logo/i did not match the image. The assertion now uses getByAltText('Image green city logo').
+
+7. should display login button. The control named sing in button is an image, so getByRole('link') never found it. The role is now img.
+
+10. should home page has search input. getByPlaceholder(/search/i) found no input. That check is commented out. The test now expects the search button image, getByAltText('Internal search button').
+
+1. should display home page text. The heading is not “A new way to grow habits”. The assertion now looks for A new way to cultivate useful.
+
+4. Newsletter subscription form. The test typed test123@example.com and then expected test@example.com. It now fills test@example.com, which matches toHaveValue.
+
+1. Footer navigation links are visible. The expected list omitted Places. Places is now included between Events and About Us.
+
+2. Footer "Follow us" social links. /leenkedin/i did not match the link name. The five links are now exact names: Twitter link, LinkedIn link, Facebook link, Instagram link, YouTube link.
 
 **Чи збіглось з початковою гіпотезою:**
 
-> _Вписати тут..._
+> Yes, the locators were the main reason the tests failed.
 
 ---
 
